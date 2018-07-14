@@ -313,8 +313,7 @@ var CompoundPath = PathItem.extend(/** @lends CompoundPath# */{
             this._setStyles(ctx, param, viewMatrix);
             var style = this._style;
             if (style.hasFill()) {
-                ctx.fill(style.getFillRule());
-                ctx.shadowColor = 'rgba(0,0,0,0)';
+                this.doPatternDraw(ctx,style);
             }
             if (style.hasStroke())
                 ctx.stroke();

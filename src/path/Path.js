@@ -2273,11 +2273,7 @@ new function() { // Scope for drawing
                 // or stroke, there is no need to continue.
                 this._setStyles(ctx, param, viewMatrix);
                 if (hasFill) {
-                    ctx.fill(style.getFillRule());
-                    // If shadowColor is defined, clear it after fill, so it
-                    // won't be applied to both fill and stroke. If the path is
-                    // only stroked, we don't have to clear it.
-                    ctx.shadowColor = 'rgba(0,0,0,0)';
+                    this.doPatternDraw(ctx,style);
                 }
                 if (hasStroke) {
                     if (dashLength) {

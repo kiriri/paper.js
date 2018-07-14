@@ -1103,4 +1103,53 @@ var PathItem = Item.extend(/** @lends PathItem# */{
      *     second segment are calculated
      * @param {Point} to the destination point of the newly added curve
      */
+
+    doPatternDraw : function(ctx,style) {
+        var pattern = style.getPattern();
+
+        if(!pattern) {
+            ctx.globalCompositeOperation = "source-over";
+            ctx.fillStyle = style.getFillColor();
+
+            ctx.fill(style.getFillRule());
+            ctx.shadowColor = 'rgba(0,0,0,0)';
+        }
+
+        // Patterns work on top of the base render
+        if(pattern) {
+
+            ctx.save();
+
+            if(pattern.backgroundColor)
+            {
+                ctx.globalCompositeOperation = "source-over";
+                ctx.fillStyle = pattern.backgroundColor;
+                ctx.fill(style.getFillRule());
+            }
+
+            //console.log(pattern);
+            //console.log(paper.view.projectToView(this.position));
+            ctx.translate(paper.view.projectToView(this.position).x,paper.view.projectToView(this.position).y);
+            //ctx.scale(1/paper.view.getScaling(),1/paper.view.getScaling());
+            ctx.fillStyle = pattern;
+            //paper.view.getScaling()
+            /*console.log(this)*/
+            //console.log(paper.view)
+            ctx.globalCompositeOperation="xor";
+
+            ctx.fill(style.getFillRule());
+
+            ctx.fillStyle = style.getFillColor()._canvasStyle//pattern.backgroundColor//this.fillColor;
+
+            ctx.globalCompositeOperation = "destination-over";
+
+            ctx.fill();
+
+
+            ctx.translate(-paper.view.projectToView(this.position).x,-paper.view.projectToView(this.position).y);
+            //ctx.scale(paper.view.getScaling(),paper.view.getScaling());
+            ctx.restore();
+
+        }
+    },
 });
