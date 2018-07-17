@@ -66,18 +66,46 @@ var PathFlattener = Base.extend({
                     // After quite a bit of testing, a default flatness of 0.25
                     // appears to offer a good trade-off between speed and
                     // precision for display purposes.
-                    && !Curve.isFlatEnough(curve, flatness || 0.25)) {
+                    && !Curve.isFlatEnough(curve, flatness || 0.25))
+            {
                 var halves = Curve.subdivide(curve, 0.5),
                     tMid = (t1 + t2) / 2;
                 // Recursively subdivide and compute parts again.
                 computeParts(halves[0], index, t1, tMid);
                 computeParts(halves[1], index, tMid, t2);
-            } else {
+            }
+            else
+            {
                 // Calculate the length of the curve interpreted as a line.
                 var dx = curve[6] - curve[0],
                     dy = curve[7] - curve[1],
                     dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist > 0) {
+
+                if(parts.length != 0) {
+                    var prevCurve = parts[parts.length - 1].curve;
+
+                    dx /= dist;
+                    dy /= dist;
+
+                    var pdx = prevCurve[6] - prevCurve[0],
+                        pdy = prevCurve[7] - prevCurve[1],
+                        dist = Math.sqrt(pdx * pdx + pdy * pdy);
+
+                    pdx /= dist;
+                    pdy /= dist;
+
+                    var dot = (1-Math.abs((dx * pdx + dy * pdy)))*20;
+
+                    //if(Game.playing)
+                    //    console.log(dx + "/" + dy + " vs " + pdx + "/" + pdy + ' = ' + dot)
+
+                }
+                else dot = 100000;
+
+
+
+
+                if (dist > 0 && flatness < dot) {
                     length += dist;
                     parts.push({
                         offset: length,
