@@ -290,6 +290,9 @@ var Point = Base.extend(/** @lends Point# */{
             );
         }
     },
+    getSqrLength: function() {
+        return this.x * this.x + this.y * this.y;
+    },
     /**
      * Returns the smaller angle between two vectors. The angle is unsigned, no
      * information about rotational direction is given.

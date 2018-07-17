@@ -9,7 +9,7 @@
  *
  * All rights reserved.
  *
- * Date: Sat Jul 14 14:19:49 2018 +0100
+ * Date: Tue Jul 17 09:58:16 2018 +0200
  *
  ***
  *
@@ -1266,6 +1266,9 @@ var Point = Base.extend({
 				this.y * scale
 			);
 		}
+	},
+	getSqrLength: function() {
+		return this.x * this.x + this.y * this.y;
 	},
 	getAngle: function() {
 		return this.getAngleInRadians.apply(this, arguments) * 180 / Math.PI;
