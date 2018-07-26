@@ -24,8 +24,8 @@ Base.inject(/** @lends Base# */{
      */
     toString: function() {
         return this._id != null
-            ?  (this._class || 'Object') + (this._name
-                ? " '" + this._name + "'"
+            ?  (this._class || 'Object') + (this.name
+                ? " '" + this.name + "'"
                 : ' @' + this._id)
             : '{ ' + Base.each(this, function(value, key) {
                 // Hide internal properties even if they are enumerable

@@ -9,7 +9,7 @@
  *
  * All rights reserved.
  *
- * Date: Tue Jul 17 09:58:16 2018 +0200
+ * Date: Tue Jul 17 12:19:03 2018 +0200
  *
  ***
  *
@@ -237,8 +237,8 @@ Base.inject({
 
 	toString: function() {
 		return this._id != null
-			?  (this._class || 'Object') + (this._name
-				? " '" + this._name + "'"
+			?  (this._class || 'Object') + (this.name
+				? " '" + this.name + "'"
 				: ' @' + this._id)
 			: '{ ' + Base.each(this, function(value, key) {
 				if (!/^_/.test(key)) {
@@ -1327,6 +1327,11 @@ var Point = Base.extend({
 			d = x * x + y * y,
 			squared = Base.read(arguments);
 		return squared ? d : Math.sqrt(d);
+	},
+	getSqrDistance: function(point) {
+		var x = point.x - this.x,
+			y = point.y - this.y;
+		return x * x + y * y;
 	},
 
 	normalize: function(length) {
@@ -3754,10 +3759,22 @@ new function() {
 }, {
 
 	_hitTest: function(point, options, parentViewMatrix) {
+
+		var prev = performance.now()
+		function checkPerf(){
+			var now = performance.now();
+			var result = now-prev;
+			prev = now;
+			return result;
+		}
+
 		if (this._locked || !this._visible || this._guide && !options.guides
 				|| this.isEmpty()) {
 			return null;
 		}
+
+		var debug = false
+		checkPerf()
 
 		var matrix = this._matrix,
 			viewMatrix = parentViewMatrix
@@ -3773,7 +3790,9 @@ new function() {
 				.expand(tolerancePadding.multiply(2))._containsPoint(point)) {
 			return null;
 		}
-
+		if(debug) {
+			console.log("Mid " + checkPerf())
+		}
 		var checkSelf = !(options.guides && !this._guide
 				|| options.selected && !this.isSelected()
 				|| options.type && options.type !== Base.hyphenate(this._class)
@@ -3790,7 +3809,8 @@ new function() {
 				options.all.push(hit);
 			return hit;
 		}
-
+		if(debug)
+			console.log("Mid2 " + checkPerf())
 		function checkPoint(type, part) {
 			var pt = part ? bounds['get' + part]() : that.getPosition();
 			if (point.subtract(pt).divide(tolerancePadding).length <= 1) {
@@ -3822,7 +3842,8 @@ new function() {
 			}
 			res = filter(res);
 		}
-
+		if(debug)
+			console.log("Mid3 " + checkPerf())
 		if (!res) {
 			res = this._hitTestChildren(point, options, viewMatrix)
 				|| checkSelf
@@ -3831,9 +3852,13 @@ new function() {
 							: viewMatrix._shiftless().invert()))
 				|| null;
 		}
+		if(debug)
+			console.log("Mid4 " + checkPerf())
 		if (res && res.point) {
 			res.point = matrix.transform(res.point);
 		}
+		if(debug)
+			console.log("End " + checkPerf())
 		return res;
 	},
 
@@ -5275,9 +5300,8 @@ var Raster = Item.extend({
 		return canvas ? canvas.toDataURL.apply(canvas, arguments) : null;
 	},
 
-	drawImage: function(image ) {
-		var point = Point.read(arguments, 1);
-		this.getContext(true).drawImage(image, point.x, point.y);
+	drawImage: function(image,x,y,width,height) {
+		this.getContext(true).drawImage(image,x,y,width,height);
 	},
 
 	getAverageColor: function(object) {
@@ -5399,8 +5423,10 @@ var Raster = Item.extend({
 		var element = this.getElement();
 		if (element) {
 			ctx.globalAlpha = this._opacity;
-			ctx.drawImage(element,
-					-this._size.width / 2, -this._size.height / 2);
+			if(this.absolute)
+				ctx.drawImage(element, -this._size.width / (2 * this.view.zoom), -this._size.height / (2 * this.view.zoom),this._size.width / this.view.zoom,this._size.height / this.view.zoom);
+			else
+				ctx.drawImage(element, -this._size.width / 2, -this._size.height / 2);
 		}
 	},
 
@@ -8859,8 +8885,8 @@ var Path = PathItem.extend({
 			if (!loc && join === 'miter' && numSegments > 1) {
 				for (var i = 0; i < numSegments; i++) {
 					var segment = segments[i];
-					if (point.getDistance(segment._point)
-							<= miterLimit * strokeRadius
+					if (point.getSqrDistance(segment._point)
+							<= miterLimit * miterLimit * strokeRadius * strokeRadius
 							&& checkSegmentStroke(segment)) {
 						loc = segment.getLocation();
 						break;
@@ -14139,8 +14165,8 @@ new function() {
 			parent = !isRoot && item.getParent(),
 			style = [];
 
-		if (item._name != null)
-			attrs.id = item._name;
+		if (item.name != null)
+			attrs.id = item.name;
 
 		Base.each(SvgStyles, function(entry) {
 			var get = entry.get,

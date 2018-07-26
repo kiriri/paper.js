@@ -441,6 +441,16 @@ var Point = Base.extend(/** @lends Point# */{
             squared = Base.read(arguments);
         return squared ? d : Math.sqrt(d);
     },
+    /**
+     * Why introduce an expensive variable into a core "needs to be as fast as possible" function?
+     * @param {Point} point
+     * @returns {number}
+     */
+    getSqrDistance: function(point) {
+        var x = point.x - this.x,
+            y = point.y - this.y;
+        return x * x + y * y;
+    },
 
     /**
      * Normalize modifies the {@link #length} of the vector to `1` without

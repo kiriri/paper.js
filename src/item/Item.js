@@ -1921,11 +1921,27 @@ new function() { // Injection scope for hit-test functions shared with project
      */
 
     _hitTest: function(point, options, parentViewMatrix) {
+
+        var prev = performance.now()
+        function checkPerf(){
+            var now = performance.now();
+            var result = now-prev;
+            prev = now;
+            return result;
+        }
+
         if (this._locked || !this._visible || this._guide && !options.guides
                 || this.isEmpty()) {
             return null;
         }
 
+        var debug = false//!this._parent; // TODO : Fix performance!
+        // TODO : Parent bounds do not encompass child bounds. No early terminations possible
+        // implementing absolute bounds requires updates on child bounds changes
+        checkPerf()
+
+        //if(debug)
+        //    console.log("Start " + checkPerf())
         // Check if the point is withing roughBounds + tolerance, but only if
         // this item does not have children, since we'd have to travel up the
         // chain already to determine the rough bounds.
@@ -1955,8 +1971,11 @@ new function() { // Injection scope for hit-test functions shared with project
                 .expand(tolerancePadding.multiply(2))._containsPoint(point)) {
             return null;
         }
-
-        // See if we should check self (own content), by filtering for type,
+        if(debug) {
+            console.log("Mid " + checkPerf())
+            //console.log(this)
+        }
+            // See if we should check self (own content), by filtering for type,
         // guides and selected items if that's required.
         var checkSelf = !(options.guides && !this._guide
                 || options.selected && !this.isSelected()
@@ -1977,7 +1996,8 @@ new function() { // Injection scope for hit-test functions shared with project
                 options.all.push(hit);
             return hit;
         }
-
+        if(debug)
+            console.log("Mid2 " + checkPerf())
         function checkPoint(type, part) {
             var pt = part ? bounds['get' + part]() : that.getPosition();
             // Since there are transformations, we cannot simply use a numerical
@@ -2015,7 +2035,8 @@ new function() { // Injection scope for hit-test functions shared with project
             }
             res = filter(res);
         }
-
+        if(debug)
+            console.log("Mid3 " + checkPerf())
         if (!res) {
             res = this._hitTestChildren(point, options, viewMatrix)
                 // NOTE: We don't call match on _hitTestChildren() because
@@ -2028,10 +2049,14 @@ new function() { // Injection scope for hit-test functions shared with project
                             : viewMatrix._shiftless().invert()))
                 || null;
         }
+        if(debug)
+            console.log("Mid4 " + checkPerf())
         // Transform the point back to the outer coordinate system.
         if (res && res.point) {
             res.point = matrix.transform(res.point);
         }
+        if(debug)
+            console.log("End " + checkPerf())
         return res;
     },
 

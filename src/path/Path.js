@@ -1790,8 +1790,8 @@ var Path = PathItem.extend(/** @lends Path# */{
             if (!loc && join === 'miter' && numSegments > 1) {
                 for (var i = 0; i < numSegments; i++) {
                     var segment = segments[i];
-                    if (point.getDistance(segment._point)
-                            <= miterLimit * strokeRadius
+                    if (point.getSqrDistance(segment._point)
+                            <= miterLimit * miterLimit * strokeRadius * strokeRadius
                             && checkSegmentStroke(segment)) {
                         loc = segment.getLocation();
                         break;

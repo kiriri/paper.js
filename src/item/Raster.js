@@ -490,9 +490,9 @@ var Raster = Item.extend(/** @lends Raster# */{
      * @param {Point} point the offset of the image as a point in pixel
      * coordinates
      */
-    drawImage: function(image /*, point */) {
-        var point = Point.read(arguments, 1);
-        this.getContext(true).drawImage(image, point.x, point.y);
+    drawImage: function(image,x,y,width,height) {
+        //var point = Point.read(arguments, 1);
+        this.getContext(true).drawImage(image,x,y,width,height);
     },
 
     /**
@@ -731,9 +731,17 @@ var Raster = Item.extend(/** @lends Raster# */{
         if (element) {
             // Handle opacity for Rasters separately from the rest, since
             // Rasters never draw a stroke. See Item#draw().
+            //console.error(this);
             ctx.globalAlpha = this._opacity;
-            ctx.drawImage(element,
-                    -this._size.width / 2, -this._size.height / 2);
+            //console.log(this.getContext(true))
+            //this.getContext(true).setTransform(1,0,0,0,1,0,0,0,1)
+            if(this.absolute) {
+                let width = this._size.width / this.view.zoom;
+                let height = this._size.height / this.view.zoom;
+                ctx.drawImage(element, -width/2, -height/2, width, height);
+            }
+            else
+                ctx.drawImage(element, -this._size.width / 2, -this._size.height / 2);
         }
     },
 
